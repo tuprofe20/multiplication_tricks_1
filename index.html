@@ -1,0 +1,1684 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TuProfe20 Lab - Mates Mágicas (Sonic Edition)</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap');
+        
+        body { margin: 0; padding: 0; overflow-x: hidden; user-select: none; }
+        .font-fun { font-family: 'Nunito', sans-serif; }
+        
+        @keyframes slideInRight { 0% { opacity: 0; transform: translateX(25px); } 100% { opacity: 1; transform: translateX(0); } }
+        @keyframes confettiExplosion { 0% { transform: translate(0, 0) scale(1) rotate(0deg); opacity: 1; } 80% { opacity: 1; } 100% { transform: translate(var(--tx), var(--ty)) scale(0) rotate(var(--rot)); opacity: 0; } }
+        
+        @keyframes starRadialExplosion {
+            0% { transform: translate(0, 0) scale(0) rotate(0deg); opacity: 1; filter: brightness(1) drop-shadow(0 0 5px rgba(251,191,36,0.8)); }
+            20% { transform: translate(calc(var(--tx) * 0.2), calc(var(--ty) * 0.2)) scale(var(--s)) rotate(calc(var(--rot) * 0.2)); opacity: 1; filter: brightness(1.5) drop-shadow(0 0 15px rgba(251,191,36,1)); }
+            100% { transform: translate(var(--tx), var(--ty)) scale(0) rotate(var(--rot)); opacity: 0; filter: brightness(1) drop-shadow(0 0 0 rgba(251,191,36,0)); }
+        }
+
+        @keyframes jellyPop {
+            0% { transform: scale3d(.3, .3, .3); opacity: 0; }
+            20% { transform: scale3d(1.2, 1.2, 1.2); }
+            40% { transform: scale3d(.9, .9, .9); }
+            60% { transform: scale3d(1.1, 1.1, 1.1); opacity: 1; }
+            80% { transform: scale3d(.95, .95, .95); }
+            100% { transform: scale3d(1, 1, 1); opacity: 1; }
+        }
+
+        @keyframes wiggle {
+            0%, 100% { transform: rotate(-5deg); }
+            50% { transform: rotate(5deg) scale(1.1); }
+        }
+
+        @keyframes sonicIdle { 0%, 100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-7px) rotate(-2deg); } }
+        @keyframes sonicSpin { 0% { transform: rotate(0deg) scale(1); } 50% { transform: rotate(180deg) scale(1.15); } 100% { transform: rotate(360deg) scale(1); } }
+        @keyframes sonicJump { 0%, 100% { transform: translateY(0) scale(1); } 40% { transform: translateY(-18px) scale(1.08) rotate(3deg); } }
+        @keyframes sonicThink { 0%, 100% { transform: rotate(0deg); } 50% { transform: rotate(-6deg) translateY(-3px); } }
+        @keyframes ringSpin { 0% { transform: rotateY(0deg); } 100% { transform: rotateY(360deg); } }
+        @keyframes quillWave { 0%, 100% { transform: rotate(0deg); } 50% { transform: rotate(-4deg); } }
+        @keyframes shoeTap { 0%, 100% { transform: rotate(0deg); } 50% { transform: rotate(-12deg) translateY(-2px); } }
+        @keyframes auraPulse { 0%, 100% { transform: scale(1); opacity: 0.55; } 50% { transform: scale(1.18); opacity: 0.9; } }
+        @keyframes sparkSpin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        @keyframes pointsFloat {
+            0% { transform: translateY(0) scale(0.5); opacity: 0; }
+            20% { transform: translateY(-20px) scale(1.2); opacity: 1; }
+            80% { transform: translateY(-40px) scale(1); opacity: 1; }
+            100% { transform: translateY(-60px) scale(0.8); opacity: 0; }
+        }
+
+        .animate-slideInRight { animation: slideInRight 0.3s ease-out forwards; }
+        .animate-confettiExplosion { animation: confettiExplosion 1.8s cubic-bezier(0.25, 1, 0.5, 1) forwards; }
+        .animate-starRadialExplosion { animation: starRadialExplosion 1.5s cubic-bezier(0.25, 1, 0.5, 1) forwards; }
+        .animate-jellyPop { animation: jellyPop 0.55s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        .animate-wiggle { animation: wiggle 1.5s ease-in-out infinite; }
+        .animate-sonicIdle { animation: sonicIdle 2.2s ease-in-out infinite; }
+        .animate-sonicJump { animation: sonicJump 0.9s cubic-bezier(0.28, 0.84, 0.42, 1) infinite; }
+        .animate-sonicThink { animation: sonicThink 2s ease-in-out infinite; }
+        .animate-sonicSpin { animation: sonicSpin 0.35s linear infinite; }
+        .animate-pointsFloat { animation: pointsFloat 1.5s ease-out forwards; }
+        .animate-quillWave { animation: quillWave 1.6s ease-in-out infinite; transform-origin: 65px 55px; }
+        .animate-shoeTap { animation: shoeTap 0.55s ease-in-out infinite; transform-origin: 85px 128px; }
+        .animate-auraPulse { animation: auraPulse 1.2s ease-in-out infinite; }
+        .animate-sparkSpin { animation: sparkSpin 4s linear infinite; }
+        
+        /* Custom scrollbar for small screens if needed */
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-thumb { background: rgba(148,163,184,0.45); border-radius: 9999px; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef, memo, Fragment } = React;
+
+        const Icon = ({ paths, className = "", size = 24, fill = "none", strokeWidth = "2.2" }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill={fill} stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" className={className} dangerouslySetInnerHTML={{__html: paths}} />
+        );
+
+        const Zap = (p) => <Icon {...p} paths='<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>' />;
+        const VolumeX = (p) => <Icon {...p} paths='<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/>' />;
+        const Volume2 = (p) => <Icon {...p} paths='<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>' />;
+        const Rocket = (p) => <Icon {...p} paths='<path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/>' />;
+        const Star = (p) => <Icon {...p} paths='<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>' />;
+        const Sparkles = (p) => <Icon {...p} paths='<path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/><path d="M5 3v4"/><path d="M3 5h4"/><path d="M19 3v4"/><path d="M17 5h4"/>' />;
+        const Home = (p) => <Icon {...p} paths='<path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>' />;
+        const RotateCcw = (p) => <Icon {...p} paths='<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/>' />;
+        const ChevronLeft = (p) => <Icon {...p} paths='<polyline points="15 18 9 12 15 6"/>' />;
+        const ChevronRight = (p) => <Icon {...p} paths='<polyline points="9 18 15 12 9 6"/>' />;
+        const Flame = (p) => <Icon {...p} paths='<path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/>' />;
+        const Crown = (p) => <Icon {...p} paths='<path d="m2 4 3 12h14l3-12-6 7-4-7-4 7-6-7zm3 16h14"/>' />;
+
+        // ==========================================
+        // CONFIGURACIÓN DE LOS 8 TRUCOS DEL PDF
+        // (Trucos 1, 4, 5, 6, 7, 8, 9 y 10 con 8 ejemplos cada uno)
+        // ==========================================
+        const TRICKS_INFO = [
+            {
+                id: 'trick1',
+                number: 'Truco 1',
+                level: 'Nivel 1 • Súper Fácil',
+                title: '×10, ×100 y ×1000',
+                subtitle: 'Agrega tantos ceros como tenga el 10, 100 o 1000.',
+                badge: '×10ⁿ',
+                gradient: 'from-amber-400/30 to-orange-500/40',
+                border: 'border-amber-400/60',
+                shadow: 'hover:shadow-[0_20px_40px_rgba(245,158,11,0.45)]'
+            },
+            {
+                id: 'trick4',
+                number: 'Truco 4',
+                level: 'Nivel 2 • Poder del Doble',
+                title: 'Multiplicar por 4',
+                subtitle: '¡Duplica el número dos veces seguidas!',
+                badge: '×4',
+                gradient: 'from-cyan-400/30 to-blue-600/40',
+                border: 'border-cyan-400/60',
+                shadow: 'hover:shadow-[0_20px_40px_rgba(6,182,212,0.45)]'
+            },
+            {
+                id: 'trick5',
+                number: 'Truco 5',
+                level: 'Nivel 2 • Poder del Doble',
+                title: 'Multiplicar por 8',
+                subtitle: '¡Duplica el número tres veces a velocidad sónica!',
+                badge: '×8',
+                gradient: 'from-indigo-400/30 to-blue-700/40',
+                border: 'border-indigo-400/60',
+                shadow: 'hover:shadow-[0_20px_40px_rgba(99,102,241,0.45)]'
+            },
+            {
+                id: 'trick6',
+                number: 'Truco 6',
+                level: 'Nivel 3 • Especiales',
+                title: '×9 (Una Cifra)',
+                subtitle: 'Resta 1 a la cifra y luego completa hasta 9.',
+                badge: '1d × 9',
+                gradient: 'from-pink-500/30 to-rose-600/40',
+                border: 'border-pink-400/60',
+                shadow: 'hover:shadow-[0_20px_40px_rgba(244,63,94,0.45)]'
+            },
+            {
+                id: 'trick7',
+                number: 'Truco 7',
+                level: 'Nivel 3 • Especiales',
+                title: '×9 (Cualquier Número)',
+                subtitle: 'Multiplica por 10 y resta una vez el número original.',
+                badge: 'N × 9',
+                gradient: 'from-purple-500/30 to-fuchsia-600/40',
+                border: 'border-purple-400/60',
+                shadow: 'hover:shadow-[0_20px_40px_rgba(168,85,247,0.45)]'
+            },
+            {
+                id: 'trick8',
+                number: 'Truco 8',
+                level: 'Nivel 3 • Especiales',
+                title: '×11 (Una Cifra)',
+                subtitle: '¡Súper instantáneo! Simplemente repite la cifra.',
+                badge: '1d × 11',
+                gradient: 'from-emerald-400/30 to-teal-600/40',
+                border: 'border-emerald-400/60',
+                shadow: 'hover:shadow-[0_20px_40px_rgba(16,185,129,0.45)]'
+            },
+            {
+                id: 'trick9',
+                number: 'Truco 9',
+                level: 'Nivel 3 • Especiales',
+                title: '×11 (Dos Cifras)',
+                subtitle: 'Separa las cifras a los lados y pon su suma al centro.',
+                badge: 'ab × 11',
+                gradient: 'from-sky-400/30 to-indigo-600/40',
+                border: 'border-sky-400/60',
+                shadow: 'hover:shadow-[0_20px_40px_rgba(14,165,233,0.45)]'
+            },
+            {
+                id: 'trick10',
+                number: 'Truco 10',
+                level: 'Nivel 4 • Descomponer',
+                title: 'Multiplicar por 6',
+                subtitle: 'Piensa en 6 = 5 + 1. Calcula ×5 y suma el número.',
+                badge: '×6',
+                gradient: 'from-lime-400/30 to-green-600/40',
+                border: 'border-lime-400/60',
+                shadow: 'hover:shadow-[0_20px_40px_rgba(132,204,22,0.45)]'
+            }
+        ];
+
+        // 8 Ejemplos Guiados por cada truco
+        const EXERCISES = {
+            trick1: [ [34, 10], [34, 100], [7, 1000], [45, 10], [18, 100], [92, 10], [6, 100], [25, 1000] ],
+            trick4: [ [23, 4], [15, 4], [31, 4], [14, 4], [25, 4], [42, 4], [18, 4], [35, 4] ],
+            trick5: [ [12, 8], [15, 8], [11, 8], [20, 8], [13, 8], [25, 8], [14, 8], [30, 8] ],
+            trick6: [ [7, 9], [4, 9], [6, 9], [8, 9], [3, 9], [5, 9], [9, 9], [2, 9] ],
+            trick7: [ [34, 9], [15, 9], [22, 9], [41, 9], [18, 9], [25, 9], [52, 9], [61, 9] ],
+            trick8: [ [7, 11], [3, 11], [5, 11], [8, 11], [2, 11], [6, 11], [9, 11], [4, 11] ],
+            trick9: [ [23, 11], [35, 11], [42, 11], [53, 11], [71, 11], [26, 11], [62, 11], [81, 11] ],
+            trick10: [ [24, 6], [14, 6], [16, 6], [22, 6], [12, 6], [18, 6], [30, 6], [42, 6] ]
+        };
+
+        // 8 Ejercicios de Práctica por cada truco
+        const PRACTICE_EXERCISES = {
+            trick1: [ [56, 10], [19, 100], [4, 1000], [83, 10], [72, 100], [15, 1000], [90, 10], [31, 100] ],
+            trick4: [ [16, 4], [21, 4], [24, 4], [32, 4], [27, 4], [45, 4], [19, 4], [50, 4] ],
+            trick5: [ [16, 8], [10, 8], [21, 8], [17, 8], [22, 8], [19, 8], [24, 8], [40, 8] ],
+            trick6: [ [5, 9], [8, 9], [3, 9], [7, 9], [9, 9], [4, 9], [6, 9], [2, 9] ],
+            trick7: [ [14, 9], [23, 9], [31, 9], [45, 9], [16, 9], [28, 9], [51, 9], [72, 9] ],
+            trick8: [ [6, 11], [9, 11], [4, 11], [8, 11], [2, 11], [7, 11], [5, 11], [3, 11] ],
+            trick9: [ [34, 11], [45, 11], [27, 11], [63, 11], [54, 11], [72, 11], [18, 11], [80, 11] ],
+            trick10: [ [16, 6], [26, 6], [20, 6], [28, 6], [32, 6], [34, 6], [40, 6], [50, 6] ]
+        };
+
+        const AudioController = {
+            ctx: null, muted: false,
+            init: function() {
+                if (this.ctx) return;
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                if (AudioContext) this.ctx = new AudioContext();
+            },
+            play: function(type) {
+                if (this.muted || !this.ctx) return;
+                if (this.ctx.state === 'suspended') this.ctx.resume();
+                const now = this.ctx.currentTime;
+                
+                if (type === 'pop') {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.connect(gain); gain.connect(this.ctx.destination);
+                    osc.type = 'sine'; osc.frequency.setValueAtTime(520, now); osc.frequency.exponentialRampToValueAtTime(880, now + 0.1);
+                    gain.gain.setValueAtTime(0.25, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+                    osc.start(now); osc.stop(now + 0.1);
+                } else if (type === 'pop-reverse') {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.connect(gain); gain.connect(this.ctx.destination);
+                    osc.type = 'triangle'; osc.frequency.setValueAtTime(600, now); osc.frequency.exponentialRampToValueAtTime(250, now + 0.15);
+                    gain.gain.setValueAtTime(0.2, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+                    osc.start(now); osc.stop(now + 0.15);
+                } else if (type === 'ring') {
+                    // Classic Sonic Ring chime (B5 -> E6)
+                    const freqs = [987.77, 1318.51];
+                    freqs.forEach((f, idx) => {
+                        const o = this.ctx.createOscillator();
+                        const g = this.ctx.createGain();
+                        o.type = 'sine';
+                        o.frequency.setValueAtTime(f, now + idx * 0.07);
+                        o.connect(g); g.connect(this.ctx.destination);
+                        g.gain.setValueAtTime(0.22, now + idx * 0.07);
+                        g.gain.exponentialRampToValueAtTime(0.008, now + idx * 0.07 + 0.35);
+                        o.start(now + idx * 0.07);
+                        o.stop(now + idx * 0.07 + 0.35);
+                    });
+                } else if (type === 'success') {
+                    const notes = [587.33, 783.99, 987.77, 1174.66, 1567.98];
+                    notes.forEach((freq, i) => {
+                        const o = this.ctx.createOscillator(); const g = this.ctx.createGain();
+                        o.type = 'triangle'; o.frequency.value = freq;
+                        o.connect(g); g.connect(this.ctx.destination);
+                        const startTime = now + (i * 0.065);
+                        g.gain.setValueAtTime(0, startTime); g.gain.linearRampToValueAtTime(0.22, startTime + 0.04); g.gain.linearRampToValueAtTime(0, startTime + 0.38);
+                        o.start(startTime); o.stop(startTime + 0.38);
+                    });
+                } else if (type === 'swoosh') {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.connect(gain); gain.connect(this.ctx.destination);
+                    osc.type = 'sine'; osc.frequency.setValueAtTime(320, now); osc.frequency.exponentialRampToValueAtTime(65, now + 0.18);
+                    gain.gain.setValueAtTime(0.25, now); gain.gain.linearRampToValueAtTime(0.01, now + 0.18);
+                    osc.start(now); osc.stop(now + 0.18);
+                }
+            },
+            toggleMute: function() { this.muted = !this.muted; return this.muted; }
+        };
+
+        const InteractiveSonicBackground = memo(() => {
+            const canvasRef = useRef(null);
+
+            useEffect(() => {
+                const canvas = canvasRef.current;
+                if (!canvas) return;
+                const ctx = canvas.getContext('2d');
+                let animId;
+                let width = canvas.width = window.innerWidth;
+                let height = canvas.height = window.innerHeight;
+
+                const handleResize = () => {
+                    if (!canvas) return;
+                    width = canvas.width = window.innerWidth;
+                    height = canvas.height = window.innerHeight;
+                };
+                window.addEventListener('resize', handleResize);
+
+                const symbols = ['×10', '×4', '×8', '×9', '×11', '×6', '⚡', '★', '000'];
+                const items = Array.from({ length: 34 }).map(() => ({
+                    x: Math.random() * width,
+                    y: Math.random() * height,
+                    vx: (Math.random() - 0.5) * 1.1,
+                    vy: -0.6 - Math.random() * 1.2,
+                    size: 16 + Math.random() * 20,
+                    isRing: Math.random() > 0.42,
+                    symbol: symbols[Math.floor(Math.random() * symbols.length)],
+                    angle: Math.random() * Math.PI * 2,
+                    spinSpeed: 0.02 + Math.random() * 0.04,
+                    alpha: 0.18 + Math.random() * 0.25
+                }));
+
+                const bursts = [];
+                const mouse = { x: -9999, y: -9999 };
+
+                const onMove = (e) => {
+                    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                    mouse.x = clientX;
+                    mouse.y = clientY;
+                };
+
+                const onClick = (e) => {
+                    const clientX = e.changedTouches ? e.changedTouches[0].clientX : e.clientX;
+                    const clientY = e.changedTouches ? e.changedTouches[0].clientY : e.clientY;
+                    for (let i = 0; i < 8; i++) {
+                        const a = (Math.PI * 2 * i) / 8 + Math.random() * 0.3;
+                        const spd = 2.5 + Math.random() * 4;
+                        bursts.push({
+                            x: clientX,
+                            y: clientY,
+                            vx: Math.cos(a) * spd,
+                            vy: Math.sin(a) * spd - 1.5,
+                            r: 8 + Math.random() * 5,
+                            life: 1
+                        });
+                    }
+                };
+
+                window.addEventListener('mousemove', onMove);
+                window.addEventListener('touchmove', onMove, { passive: true });
+                window.addEventListener('mousedown', onClick);
+
+                const render = () => {
+                    ctx.clearRect(0, 0, width, height);
+
+                    // Draw interactive floating items
+                    items.forEach(p => {
+                        const dx = p.x - mouse.x;
+                        const dy = p.y - mouse.y;
+                        const dist = Math.sqrt(dx * dx + dy * dy);
+                        if (dist < 130 && dist > 0) {
+                            const force = (130 - dist) / 130;
+                            p.x += (dx / dist) * force * 5.5;
+                            p.y += (dy / dist) * force * 5.5;
+                        }
+
+                        p.x += p.vx;
+                        p.y += p.vy;
+                        p.angle += p.spinSpeed;
+
+                        if (p.y < -50) { p.y = height + 40; p.x = Math.random() * width; }
+                        if (p.x < -50) p.x = width + 40;
+                        if (p.x > width + 50) p.x = -40;
+
+                        ctx.save();
+                        ctx.translate(p.x, p.y);
+                        ctx.globalAlpha = p.alpha;
+
+                        if (p.isRing) {
+                            const scaleX = Math.max(0.25, Math.abs(Math.cos(p.angle)));
+                            ctx.scale(scaleX, 1);
+                            ctx.beginPath();
+                            ctx.arc(0, 0, p.size * 0.65, 0, Math.PI * 2);
+                            ctx.strokeStyle = '#fde047';
+                            ctx.lineWidth = 4.5;
+                            ctx.shadowColor = '#f59e0b';
+                            ctx.shadowBlur = 10;
+                            ctx.stroke();
+                        } else {
+                            ctx.font = `900 ${p.size}px Nunito, sans-serif`;
+                            ctx.fillStyle = '#ffffff';
+                            ctx.textAlign = 'center';
+                            ctx.textBaseline = 'middle';
+                            ctx.fillText(p.symbol, 0, 0);
+                        }
+                        ctx.restore();
+                    });
+
+                    // Draw click ring bursts
+                    for (let i = bursts.length - 1; i >= 0; i--) {
+                        const b = bursts[i];
+                        b.x += b.vx;
+                        b.y += b.vy;
+                        b.vy += 0.12;
+                        b.life -= 0.025;
+                        if (b.life <= 0) {
+                            bursts.splice(i, 1);
+                            continue;
+                        }
+                        ctx.save();
+                        ctx.globalAlpha = b.life;
+                        ctx.beginPath();
+                        ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
+                        ctx.strokeStyle = '#facc15';
+                        ctx.lineWidth = 3.5;
+                        ctx.shadowColor = '#fbbf24';
+                        ctx.shadowBlur = 8;
+                        ctx.stroke();
+                        ctx.restore();
+                    }
+
+                    animId = requestAnimationFrame(render);
+                };
+                render();
+
+                return () => {
+                    cancelAnimationFrame(animId);
+                    window.removeEventListener('resize', handleResize);
+                    window.removeEventListener('mousemove', onMove);
+                    window.removeEventListener('touchmove', onMove);
+                    window.removeEventListener('mousedown', onClick);
+                };
+            }, []);
+
+            return <canvas ref={canvasRef} className="fixed inset-0 pointer-events-none z-0" />;
+        });
+
+        const Confetti = memo(() => {
+            const colors = ['#fde047', '#38bdf8', '#f472b6', '#34d399', '#60a5fa', '#fb923c'];
+            const pieces = Array.from({ length: 85 }).map((_, i) => ({
+                id: i, left: `${50 + (Math.random() * 20 - 10)}%`, color: colors[Math.floor(Math.random() * colors.length)],
+                tx: `${(Math.random() - 0.5) * 650}px`, ty: `${(Math.random() - 1) * 550}px`, rot: `${Math.random() * 720}deg`, delay: `${Math.random() * 0.15}s`
+            }));
+            return (
+                <div className="absolute inset-0 pointer-events-none z-50 flex items-center justify-center overflow-hidden">
+                    {pieces.map((p) => (
+                        <div key={p.id} className="absolute w-4 h-4 sm:w-5 sm:h-5 rounded-full animate-confettiExplosion shadow-sm" style={{ backgroundColor: p.color, '--tx': p.tx, '--ty': p.ty, '--rot': p.rot, animationDelay: p.delay, left: p.left, top: '50%' }} />
+                    ))}
+                </div>
+            );
+        });
+
+        const GoldenRingsExplosion = memo(() => {
+            const rings = Array.from({ length: 20 }).map((_, i) => {
+                const angle = Math.random() * Math.PI * 2;
+                const distance = 80 + Math.random() * 190;
+                const size = 1.6 + Math.random() * 1.6;
+                return { id: i, tx: `${Math.cos(angle) * distance}px`, ty: `${Math.sin(angle) * distance}px`, rot: `${Math.random() * 360 + 360}deg`, delay: `${Math.random() * 0.12}s`, size: `${size}rem`, sScale: 0.9 + Math.random() * 0.5 };
+            });
+            return (
+                <div className="absolute inset-0 pointer-events-none z-50 flex items-center justify-center overflow-visible">
+                    {rings.map((s) => (
+                        <div key={s.id} className="absolute animate-starRadialExplosion" style={{ '--tx': s.tx, '--ty': s.ty, '--rot': s.rot, '--s': s.sScale, animationDelay: s.delay, width: s.size, height: s.size }}>
+                            <svg viewBox="0 0 36 36" className="w-full h-full drop-shadow-[0_0_12px_rgba(251,191,36,0.95)]">
+                                <circle cx="18" cy="18" r="13" fill="none" stroke="#fbbf24" strokeWidth="6" />
+                                <circle cx="18" cy="18" r="13" fill="none" stroke="#fef08a" strokeWidth="2" />
+                            </svg>
+                        </div>
+                    ))}
+                </div>
+            );
+        });
+
+        const SonicAssistant = ({ step, maxSteps, isPracticeMode, feedbackStatus, onPoke, size = "normal" }) => {
+            const [spinBoost, setSpinBoost] = useState(false);
+            const [combo, setCombo] = useState(0);
+            const isFinalStep = step >= maxSteps && !isPracticeMode;
+            const isHappy = feedbackStatus === 'success' || isFinalStep;
+            const isThinking = feedbackStatus === 'error';
+
+            const triggerSpin = () => {
+                setSpinBoost(true);
+                setCombo(c => c + 1);
+                AudioController.init();
+                AudioController.play('ring');
+                if (onPoke) onPoke();
+                setTimeout(() => setSpinBoost(false), 650);
+            };
+
+            const getAnimClass = () => {
+                if (spinBoost) return '';
+                if (isThinking) return 'animate-sonicThink';
+                if (isHappy) return 'animate-sonicJump';
+                return 'animate-sonicIdle';
+            };
+
+            const isHero = size === "hero";
+            const sizeClasses = isHero
+                ? "w-24 h-24 sm:w-32 sm:h-32 md:w-36 md:h-36"
+                : "w-16 h-16 sm:w-24 sm:h-24 md:w-28 md:h-28";
+
+            // Dynamic color palette: Super Sonic Gold when happy/completed, Classic Sonic Blue otherwise
+            const mainFur = isHappy ? "url(#superSonicGold)" : "url(#sonicBlueGrad)";
+            const darkFur = isHappy ? "#d97706" : "#1d4ed8";
+            const outlineColor = isHappy ? "#78350f" : "#0f172a";
+            const eyeColor = isHappy ? "#ef4444" : "#10b981";
+
+            return (
+                <div 
+                    onClick={triggerSpin}
+                    title="¡Toca a Sonic para hacer un Spin Dash y ganar anillos!"
+                    className={`relative flex flex-col items-center cursor-pointer select-none group shrink-0 ${getAnimClass()}`}
+                >
+                    {/* Floating Golden Ring + Combo badge above Sonic */}
+                    <div className="relative -mb-2.5 z-20 flex items-center gap-1 transition-transform group-hover:scale-125">
+                        <svg viewBox="0 0 36 36" className={`w-6 h-6 sm:w-8 sm:h-8 drop-shadow-[0_0_10px_rgba(250,204,21,0.9)] ${isHappy ? 'animate-spin' : 'animate-bounce'}`}>
+                            <circle cx="18" cy="18" r="11" fill="none" stroke="#facc15" strokeWidth="5.5" />
+                            <circle cx="18" cy="18" r="11" fill="none" stroke="#fef08a" strokeWidth="2" />
+                        </svg>
+                        {combo > 0 && (
+                            <span className="text-[10px] sm:text-xs font-black bg-yellow-400 text-slate-950 px-1.5 py-0.5 rounded-full border border-white shadow">
+                                +{combo * 5}
+                            </span>
+                        )}
+                    </div>
+
+                    {/* Sonic Character Avatar Card */}
+                    <div className={`relative z-10 ${sizeClasses} rounded-[1.5rem] sm:rounded-[2rem] border-[3px] sm:border-[4px] ${
+                        isHappy 
+                            ? 'border-yellow-300 bg-gradient-to-br from-amber-500/90 via-yellow-500/80 to-orange-600/90 shadow-[0_0_30px_rgba(250,204,21,0.85)]' 
+                            : isThinking 
+                                ? 'border-amber-400 bg-gradient-to-br from-indigo-900 via-blue-900 to-slate-900 shadow-lg' 
+                                : 'border-cyan-300 bg-gradient-to-br from-sky-500 via-blue-700 to-indigo-950 shadow-[0_10px_25px_rgba(37,99,235,0.5)]'
+                    } flex items-center justify-center p-1 overflow-visible transition-all duration-300 group-hover:scale-105`}>
+                        
+                        {/* Electric / Super Aura Effect */}
+                        <div className={`absolute -inset-1.5 rounded-[2.2rem] bg-gradient-to-r ${
+                            isHappy ? 'from-yellow-300 via-amber-400 to-orange-500 opacity-85 animate-auraPulse' : 'from-cyan-400 via-blue-500 to-indigo-500 opacity-35'
+                        } blur-md -z-10 group-hover:opacity-80 transition-opacity`}></div>
+
+                        {/* Electric Sparks when Happy or SpinBoost */}
+                        {(isHappy || spinBoost) && (
+                            <svg viewBox="0 0 140 140" className="absolute -inset-3 w-[calc(100%+1.5rem)] h-[calc(100%+1.5rem)] pointer-events-none animate-sparkSpin z-20">
+                                <polyline points="20,40 10,35 22,28 14,20" fill="none" stroke="#fef08a" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+                                <polyline points="122,35 132,28 120,22 128,14" fill="none" stroke="#38bdf8" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+                                <polyline points="118,110 130,115 118,122 126,130" fill="none" stroke="#fef08a" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+                                <polyline points="18,108 8,114 20,120 12,128" fill="none" stroke="#38bdf8" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                        )}
+
+                        {spinBoost ? (
+                            /* TRUE SONIC SPIN DASH BALL EFFECT */
+                            <svg viewBox="0 0 140 140" className="w-full h-full overflow-visible animate-sonicSpin drop-shadow-[0_0_16px_#38bdf8]">
+                                <defs>
+                                    <radialGradient id="spinBallGrad" cx="35%" cy="35%" r="65%">
+                                        <stop offset="0%" stopColor="#60a5fa" />
+                                        <stop offset="55%" stopColor="#2563eb" />
+                                        <stop offset="100%" stopColor="#1e3a8a" />
+                                    </radialGradient>
+                                </defs>
+                                {/* Outer motion blur ring */}
+                                <circle cx="70" cy="70" r="56" fill="none" stroke="#38bdf8" strokeWidth="5" strokeDasharray="28 14" opacity="0.85" />
+                                <circle cx="70" cy="70" r="46" fill="url(#spinBallGrad)" stroke="#0f172a" strokeWidth="4" />
+                                {/* Sawblade Spikes around the Spin Dash ball */}
+                                {[0, 45, 90, 135, 180, 225, 270, 315].map((deg) => (
+                                    <path
+                                        key={deg}
+                                        d="M 62 16 L 78 4 L 80 22 Z"
+                                        fill="#3b82f6"
+                                        stroke="#0f172a"
+                                        strokeWidth="3"
+                                        transform={`rotate(${deg} 70 70)`}
+                                    />
+                                ))}
+                                {/* Inner speed swirl */}
+                                <path d="M 45 55 A 28 28 0 1 1 55 95" fill="none" stroke="#bae6fd" strokeWidth="6" strokeLinecap="round" />
+                                <path d="M 88 52 A 20 20 0 1 1 65 48" fill="none" stroke="#ffffff" strokeWidth="4" strokeLinecap="round" />
+                            </svg>
+                        ) : (
+                            /* DETAILED FULL-CHARACTER SONIC VECTOR */
+                            <svg viewBox="0 0 150 150" className="w-full h-full overflow-visible drop-shadow-md">
+                                <defs>
+                                    <linearGradient id="sonicBlueGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                        <stop offset="0%" stopColor="#38bdf8" />
+                                        <stop offset="45%" stopColor="#2563eb" />
+                                        <stop offset="100%" stopColor="#1e3a8a" />
+                                    </linearGradient>
+                                    <linearGradient id="superSonicGold" x1="0%" y1="0%" x2="100%" y2="100%">
+                                        <stop offset="0%" stopColor="#fef08a" />
+                                        <stop offset="50%" stopColor="#facc15" />
+                                        <stop offset="100%" stopColor="#ea580c" />
+                                    </linearGradient>
+                                    <linearGradient id="muzzleSkin" x1="0%" y1="0%" x2="0%" y2="100%">
+                                        <stop offset="0%" stopColor="#ffedd5" />
+                                        <stop offset="100%" stopColor="#fdba74" />
+                                    </linearGradient>
+                                    <linearGradient id="shoeRed" x1="0%" y1="0%" x2="100%" y2="100%">
+                                        <stop offset="0%" stopColor="#fb7185" />
+                                        <stop offset="50%" stopColor="#e11d48" />
+                                        <stop offset="100%" stopColor="#9f1239" />
+                                    </linearGradient>
+                                </defs>
+
+                                {/* Dynamic Back Quills (Animated wave) */}
+                                <g className="animate-quillWave">
+                                    {/* Top Super Quill */}
+                                    <path 
+                                        d={isHappy 
+                                            ? "M 62 28 C 28 2, 2 12, 8 34 C 24 30, 42 36, 54 44 Z" 
+                                            : "M 58 24 C 20 12, 2 30, 8 46 C 24 40, 38 42, 50 48 Z"} 
+                                        fill={mainFur} stroke={outlineColor} strokeWidth="3.5" strokeLinejoin="round" 
+                                    />
+                                    {/* Middle Main Quill */}
+                                    <path 
+                                        d={isHappy
+                                            ? "M 52 44 C 14 34, -6 54, 6 70 C 24 62, 38 62, 52 66 Z"
+                                            : "M 50 42 C 12 42, -4 64, 8 78 C 24 70, 38 68, 52 70 Z"} 
+                                        fill={mainFur} stroke={outlineColor} strokeWidth="3.5" strokeLinejoin="round" 
+                                    />
+                                    {/* Lower Quill */}
+                                    <path 
+                                        d="M 54 64 C 20 72, 10 92, 22 102 C 36 94, 48 88, 60 86 Z" 
+                                        fill={darkFur} stroke={outlineColor} strokeWidth="3.5" strokeLinejoin="round" 
+                                    />
+                                    {/* Quill Highlight Lines */}
+                                    <path d="M 48 28 Q 25 24 14 38" fill="none" stroke="#bae6fd" strokeWidth="2.2" strokeLinecap="round" opacity="0.6" />
+                                    <path d="M 44 48 Q 20 50 12 66" fill="none" stroke="#bae6fd" strokeWidth="2.2" strokeLinecap="round" opacity="0.6" />
+                                </g>
+
+                                {/* Sonic Torso & Belly */}
+                                <ellipse cx="74" cy="103" rx="18" ry="20" fill={mainFur} stroke={outlineColor} strokeWidth="3.5" />
+                                <ellipse cx="77" cy="104" rx="11" ry="13" fill="url(#muzzleSkin)" />
+
+                                {/* Left Leg & Iconic Red Sneaker */}
+                                <path d="M 64 118 L 58 132" stroke={darkFur} strokeWidth="6" strokeLinecap="round" />
+                                <g transform="translate(36, 125)">
+                                    <rect x="12" y="0" width="16" height="7" rx="3" fill="#ffffff" stroke={outlineColor} strokeWidth="2.5" />
+                                    <path d="M 2 14 C 2 4, 18 4, 28 6 L 30 16 L 2 16 Z" fill="url(#shoeRed)" stroke={outlineColor} strokeWidth="3" strokeLinejoin="round" />
+                                    <path d="M 12 6 L 18 6 L 16 16 L 10 16 Z" fill="#ffffff" />
+                                    <rect x="0" y="15" width="32" height="4" rx="2" fill="#e2e8f0" stroke={outlineColor} strokeWidth="2" />
+                                </g>
+
+                                {/* Right Leg & Tapping Iconic Red Sneaker with Gold Buckle */}
+                                <path d="M 82 118 L 88 132" stroke={darkFur} strokeWidth="6" strokeLinecap="round" />
+                                <g className="animate-shoeTap">
+                                    <rect x="80" y="125" width="16" height="7" rx="3" fill="#ffffff" stroke={outlineColor} strokeWidth="2.5" />
+                                    <path d="M 78 131 C 90 129, 112 131, 114 141 L 78 141 Z" fill="url(#shoeRed)" stroke={outlineColor} strokeWidth="3" strokeLinejoin="round" />
+                                    {/* White strap */}
+                                    <path d="M 92 130 L 99 130 L 97 141 L 90 141 Z" fill="#ffffff" />
+                                    {/* Golden Buckle */}
+                                    <rect x="92" y="133" width="6" height="5" rx="1" fill="#facc15" stroke={outlineColor} strokeWidth="1.5" />
+                                    <rect x="76" y="140" width="40" height="4" rx="2" fill="#e2e8f0" stroke={outlineColor} strokeWidth="2" />
+                                </g>
+
+                                {/* Back Ear */}
+                                <polygon points="50,28 36,6 64,18" fill={darkFur} stroke={outlineColor} strokeWidth="3.5" strokeLinejoin="round" />
+                                <polygon points="50,25 42,11 59,19" fill="url(#muzzleSkin)" />
+
+                                {/* Main Head Sphere */}
+                                <circle cx="76" cy="56" r="35" fill={mainFur} stroke={outlineColor} strokeWidth="3.8" />
+                                {/* Head glossy highlight */}
+                                <path d="M 55 30 A 26 26 0 0 1 92 28" fill="none" stroke="#ffffff" strokeWidth="3" strokeLinecap="round" opacity="0.45" />
+
+                                {/* Front Ear */}
+                                <polygon points="84,24 100,3 108,30" fill={mainFur} stroke={outlineColor} strokeWidth="3.5" strokeLinejoin="round" />
+                                <polygon points="88,24 98,10 103,28" fill="url(#muzzleSkin)" />
+
+                                {/* Iconic Connected Sonic Eye Visor */}
+                                <path d="M 54 58 C 54 30, 78 30, 82 50 C 85 31, 107 33, 106 58 C 106 69, 54 69, 54 58 Z" fill="#ffffff" stroke={outlineColor} strokeWidth="3" />
+
+                                {/* Expressive Emerald Green / Super Red Irises */}
+                                {isThinking ? (
+                                    <g>
+                                        <ellipse cx="71" cy="53" rx="6.5" ry="8.5" fill={eyeColor} />
+                                        <ellipse cx="72" cy="53" rx="3.5" ry="5.5" fill="#0f172a" />
+                                        <circle cx="69" cy="49" r="2.3" fill="#ffffff" />
+
+                                        <ellipse cx="94" cy="53" rx="6.5" ry="8.5" fill={eyeColor} />
+                                        <ellipse cx="95" cy="53" rx="3.5" ry="5.5" fill="#0f172a" />
+                                        <circle cx="92" cy="49" r="2.3" fill="#ffffff" />
+                                        {/* Curious / Thinking Brow */}
+                                        <path d="M 52 36 Q 68 44 80 38" fill="none" stroke={outlineColor} strokeWidth="4.5" strokeLinecap="round" />
+                                        <path d="M 84 36 Q 96 27 108 35" fill="none" stroke={outlineColor} strokeWidth="4.5" strokeLinecap="round" />
+                                    </g>
+                                ) : isHappy ? (
+                                    <g>
+                                        {/* Joyful Super Sonic Eyes */}
+                                        <path d="M 61 53 Q 70 39 78 53" fill="none" stroke="#0f172a" strokeWidth="5" strokeLinecap="round" />
+                                        <path d="M 86 53 Q 95 39 103 53" fill="none" stroke="#0f172a" strokeWidth="5" strokeLinecap="round" />
+                                    </g>
+                                ) : (
+                                    <g>
+                                        <ellipse cx="73" cy="52" rx="7" ry="10.5" fill={eyeColor} />
+                                        <ellipse cx="74" cy="52" rx="4" ry="6.8" fill="#0f172a" />
+                                        <circle cx="71.5" cy="47.5" r="2.6" fill="#ffffff" />
+                                        <circle cx="75.5" cy="55.5" r="1.3" fill="#ffffff" />
+
+                                        <ellipse cx="94" cy="52" rx="6.8" ry="10.5" fill={eyeColor} />
+                                        <ellipse cx="95" cy="52" rx="3.8" ry="6.8" fill="#0f172a" />
+                                        <circle cx="92.5" cy="47.5" r="2.6" fill="#ffffff" />
+                                        <circle cx="96.5" cy="55.5" r="1.3" fill="#ffffff" />
+
+                                        {/* Determined Sonic Brow */}
+                                        <path d="M 53 38 L 81 46 L 107 36" fill="none" stroke={outlineColor} strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
+                                    </g>
+                                )}
+
+                                {/* Sculpted Peach Muzzle & Cheek */}
+                                <path d="M 48 65 C 48 53, 114 53, 114 67 C 114 85, 88 94, 78 94 C 60 94, 48 82, 48 65 Z" fill="url(#muzzleSkin)" stroke={outlineColor} strokeWidth="3.2" />
+
+                                {/* Expressive Sonic Mouth */}
+                                {isHappy ? (
+                                    <g>
+                                        <path d="M 62 70 Q 82 90 100 68 Z" fill="#be123c" stroke={outlineColor} strokeWidth="2.8" strokeLinejoin="round" />
+                                        <path d="M 70 79 Q 82 86 92 78 Q 82 73 70 79 Z" fill="#fb7185" />
+                                        <path d="M 65 71 Q 82 75 97 69" fill="none" stroke="#ffffff" strokeWidth="3" strokeLinecap="round" />
+                                    </g>
+                                ) : isThinking ? (
+                                    <path d="M 70 79 Q 81 73 91 80" fill="none" stroke={outlineColor} strokeWidth="3.8" strokeLinecap="round" />
+                                ) : (
+                                    <g>
+                                        {/* Iconic cocky side smirk */}
+                                        <path d="M 62 74 Q 82 86 101 69" fill="none" stroke={outlineColor} strokeWidth="3.8" strokeLinecap="round" />
+                                        <path d="M 98 66 Q 104 69 101 74" fill="none" stroke={outlineColor} strokeWidth="3" strokeLinecap="round" />
+                                    </g>
+                                )}
+
+                                {/* 3D Glossy Sonic Nose */}
+                                <ellipse cx="109" cy="60" rx="8.5" ry="5.5" transform="rotate(-14 109 60)" fill="#0f172a" />
+                                <ellipse cx="106.5" cy="58" rx="3.2" ry="1.8" transform="rotate(-14 106.5 58)" fill="#ffffff" />
+
+                                {/* Left Arm + Iconic White Glove (Thumbs Up / V-Sign) */}
+                                <path d="M 58 96 Q 38 94 32 82" fill="none" stroke="url(#muzzleSkin)" strokeWidth="6" strokeLinecap="round" />
+                                <path d="M 58 96 Q 38 94 32 82" fill="none" stroke={outlineColor} strokeWidth="6" strokeLinecap="round" opacity="0.15" />
+                                <g transform="translate(14, 62)">
+                                    {/* Glove cuff */}
+                                    <rect x="11" y="16" width="14" height="7" rx="3" transform="rotate(-25 18 19)" fill="#ffffff" stroke={outlineColor} strokeWidth="2.8" />
+                                    {/* Glove palm */}
+                                    <circle cx="14" cy="12" r="9" fill="#ffffff" stroke={outlineColor} strokeWidth="2.8" />
+                                    {/* Thumbs up / Victory fingers */}
+                                    <ellipse cx="18" cy="3" rx="3.5" ry="6" transform="rotate(15 18 3)" fill="#ffffff" stroke={outlineColor} strokeWidth="2.5" />
+                                    <ellipse cx="11" cy="3" rx="3.2" ry="5.5" transform="rotate(-12 11 3)" fill="#ffffff" stroke={outlineColor} strokeWidth="2.5" />
+                                </g>
+
+                                {/* Right Arm on Hip */}
+                                <path d="M 90 96 Q 108 100 100 112" fill="none" stroke="url(#muzzleSkin)" strokeWidth="5.5" strokeLinecap="round" />
+                                <circle cx="100" cy="113" r="7" fill="#ffffff" stroke={outlineColor} strokeWidth="2.8" />
+                            </svg>
+                        )}
+                    </div>
+                </div>
+            );
+        };
+
+        // ====================================================
+        // MOTOR DE CÁLCULO Y PASOS PARA LOS 8 TRUCOS DEL PDF
+        // ====================================================
+        const getTrickData = (mode, numA, numB) => {
+            switch (mode) {
+                case 'trick1': {
+                    // Multiplicar por 10, 100 y 1000
+                    const zerosCount = String(numB).length - 1;
+                    const zerosStr = '0'.repeat(zerosCount);
+                    const ans = numA * numB;
+                    return {
+                        maxSteps: 3,
+                        ans,
+                        zerosCount,
+                        zerosStr,
+                        explanations: [
+                            <p>¡Velocidad Supersónica! ⚡ Vamos a multiplicar <span className="text-indigo-600 font-black">{numA} × {numB}</span> sin hacer cuentas largas.</p>,
+                            <p><strong>Paso 1:</strong> Cuenta cuántos ceros tiene el <span className="bg-amber-400 text-slate-900 px-2.5 py-0.5 rounded-xl font-black">{numB}</span>. ¡Tiene exactamente <strong>{zerosCount} {zerosCount === 1 ? 'cero' : 'ceros'}</strong>! 🔍</p>,
+                            <p><strong>Paso 2:</strong> Escribe el <span className="text-indigo-600 font-black">{numA}</span> y agrégale <span className="bg-emerald-500 text-white px-2.5 py-0.5 rounded-xl font-black">{zerosStr}</span> al final. 👉</p>,
+                            <p><strong>¡Meta alcanzada!:</strong> ¡Fusión lista! El resultado instantáneo es <span className="text-amber-500 font-black">{ans}</span>. 🦔💨</p>
+                        ]
+                    };
+                }
+                case 'trick4': {
+                    // Multiplicar por 4: Duplica dos veces
+                    const d1 = numA * 2;
+                    const ans = d1 * 2;
+                    return {
+                        maxSteps: 3,
+                        ans,
+                        d1,
+                        explanations: [
+                            <p>¡El Poder del Doble! ✌️ Multiplicar <span className="text-indigo-600 font-black">{numA} × 4</span> es duplicar el número <strong>dos veces</strong>.</p>,
+                            <p><strong>Paso 1 (Primer Doble):</strong> Duplicamos el {numA} ({numA} × 2). ¡Eso nos da <span className="bg-cyan-500 text-white px-2.5 py-0.5 rounded-xl font-black">{d1}</span>! ⚡</p>,
+                            <p><strong>Paso 2 (Segundo Doble):</strong> Ahora duplicamos el {d1} ({d1} × 2). ¡Nos da <span className="bg-emerald-500 text-white px-2.5 py-0.5 rounded-xl font-black">{ans}</span>! 🚀</p>,
+                            <p><strong>¡Boom Sónico!:</strong> {numA} → {d1} → <span className="text-amber-500 font-black">{ans}</span>. ¡Calculado en un parpadeo! 🏆</p>
+                        ]
+                    };
+                }
+                case 'trick5': {
+                    // Multiplicar por 8: Duplica tres veces
+                    const d1 = numA * 2;
+                    const d2 = d1 * 2;
+                    const ans = d2 * 2;
+                    return {
+                        maxSteps: 4,
+                        ans,
+                        d1,
+                        d2,
+                        explanations: [
+                            <p>¡Triple Turbo Sónico! 🌀 Para multiplicar <span className="text-indigo-600 font-black">{numA} × 8</span>, duplicamos el número <strong>tres veces</strong>.</p>,
+                            <p><strong>Paso 1 (1.er Doble):</strong> Sacamos el doble de {numA} → ¡obtenemos <span className="bg-cyan-500 text-white px-2.5 py-0.5 rounded-xl font-black">{d1}</span>! 💨</p>,
+                            <p><strong>Paso 2 (2.do Doble):</strong> Sacamos el doble de {d1} → ¡llegamos a <span className="bg-indigo-600 text-white px-2.5 py-0.5 rounded-xl font-black">{d2}</span>! ⚡</p>,
+                            <p><strong>Paso 3 (3.er Doble):</strong> Sacamos el doble de {d2} → ¡nos da <span className="bg-emerald-500 text-white px-2.5 py-0.5 rounded-xl font-black">{ans}</span>! 🔥</p>,
+                            <p><strong>¡Récord Mundial!:</strong> {numA} → {d1} → {d2} → <span className="text-amber-500 font-black">{ans}</span>. ¡Eres imparable! 🌟</p>
+                        ]
+                    };
+                }
+                case 'trick6': {
+                    // Multiplicar por 9: una cifra
+                    const left = numA - 1;
+                    const right = 9 - left;
+                    const ans = numA * 9;
+                    return {
+                        maxSteps: 3,
+                        ans,
+                        left,
+                        right,
+                        explanations: [
+                            <p>¡El Secreto del 9! 🖐️ Vamos a resolver <span className="text-indigo-600 font-black">{numA} × 9</span> con un truco mágico.</p>,
+                            <p><strong>Paso 1:</strong> Réstale 1 a la cifra ({numA} − 1). ¡Obtenemos <span className="bg-indigo-600 text-white px-2.5 py-0.5 rounded-xl font-black">{left}</span> para la primera cifra! 👈</p>,
+                            <p><strong>Paso 2:</strong> ¿Cuánto le falta a {left} para llegar a 9? (9 − {left} = <span className="bg-emerald-500 text-white px-2.5 py-0.5 rounded-xl font-black">{right}</span>). 👉</p>,
+                            <p><strong>¡Magia Completa!:</strong> Junta el {left} y el {right} para formar <span className="text-amber-500 font-black">{ans}</span>. ✨</p>
+                        ]
+                    };
+                }
+                case 'trick7': {
+                    // Multiplicar por 9: cualquier número
+                    const times10 = numA * 10;
+                    const ans = times10 - numA;
+                    return {
+                        maxSteps: 3,
+                        ans,
+                        times10,
+                        explanations: [
+                            <p>¡Atajo Inteligente! 🧠 Como <strong>9 = 10 − 1</strong>, multiplicar <span className="text-indigo-600 font-black">{numA} × 9</span> es súper fácil.</p>,
+                            <p><strong>Paso 1:</strong> Primero multiplica {numA} por 10 (solo agrega un cero): ¡nos da <span className="bg-indigo-600 text-white px-2.5 py-0.5 rounded-xl font-black">{times10}</span>! ⚡</p>,
+                            <p><strong>Paso 2:</strong> Al {times10} réstale una vez el número original (<span className="bg-rose-500 text-white px-2.5 py-0.5 rounded-xl font-black">{times10} − {numA}</span>). 🎯</p>,
+                            <p><strong>¡Resultado Perfecto!:</strong> {times10} − {numA} = <span className="text-amber-500 font-black">{ans}</span>. ¡Cálculo mental nivel Pro! 🏅</p>
+                        ]
+                    };
+                }
+                case 'trick8': {
+                    // Multiplicar por 11: una cifra
+                    const ans = numA * 11;
+                    return {
+                        maxSteps: 2,
+                        ans,
+                        explanations: [
+                            <p>¡El truco más rápido del universo! 🌌 Multiplicar una sola cifra (<span className="text-indigo-600 font-black">{numA}</span>) por 11.</p>,
+                            <p><strong>Paso 1:</strong> El 11 duplica visualmente a la cifra: pon un <span className="bg-indigo-600 text-white px-2.5 py-0.5 rounded-xl font-black">{numA}</span> al lado de otro <span className="bg-emerald-500 text-white px-2.5 py-0.5 rounded-xl font-black">{numA}</span>. 👯</p>,
+                            <p><strong>¡Así de fácil!:</strong> ¡Al repetir el {numA} obtenemos <span className="text-amber-500 font-black">{ans}</span> al instante! ⚡</p>
+                        ]
+                    };
+                }
+                case 'trick9': {
+                    // Multiplicar por 11: dos cifras (a+b < 10)
+                    const a = Math.floor(numA / 10);
+                    const b = numA % 10;
+                    const mid = a + b;
+                    const ans = numA * 11;
+                    return {
+                        maxSteps: 3,
+                        ans,
+                        a,
+                        b,
+                        mid,
+                        explanations: [
+                            <p>¡Sándwich Numérico ×11! 🥪 Vamos a calcular <span className="text-indigo-600 font-black">{numA} × 11</span> abriendo sus cifras.</p>,
+                            <p><strong>Paso 1:</strong> Separa las cifras <span className="bg-indigo-600 text-white px-2.5 py-0.5 rounded-xl font-black">{a}</span> y <span className="bg-indigo-600 text-white px-2.5 py-0.5 rounded-xl font-black">{b}</span> en los extremos dejando un espacio al centro. ↔️</p>,
+                            <p><strong>Paso 2:</strong> Suma ambas cifras ({a} + {b} = <span className="bg-emerald-500 text-white px-2.5 py-0.5 rounded-xl font-black">{mid}</span>) y coloca el {mid} en el centro. 🎯</p>,
+                            <p><strong>¡Súper Fusión!:</strong> Une {a}, {mid} y {b} → ¡La respuesta es <span className="text-amber-500 font-black">{ans}</span>! 🎉</p>
+                        ]
+                    };
+                }
+                case 'trick10': {
+                    // Multiplicar por 6: piensa en 6 = 5 + 1
+                    const x5 = numA * 5;
+                    const ans = x5 + numA;
+                    return {
+                        maxSteps: 3,
+                        ans,
+                        x5,
+                        explanations: [
+                            <p>¡Descomponer para Ganar! 🧩 Piensa que <strong>6 = 5 + 1</strong> para resolver <span className="text-indigo-600 font-black">{numA} × 6</span>.</p>,
+                            <p><strong>Paso 1:</strong> Calcula primero <span className="text-indigo-600 font-black">{numA} × 5</span> (la mitad de {numA * 10}): ¡eso es <span className="bg-indigo-600 text-white px-2.5 py-0.5 rounded-xl font-black">{x5}</span>! ⚡</p>,
+                            <p><strong>Paso 2:</strong> Ahora súmale una vez el número original (<span className="bg-emerald-500 text-white px-2.5 py-0.5 rounded-xl font-black">{x5} + {numA}</span>). ➕</p>,
+                            <p><strong>¡Victoria Sónica!:</strong> {x5} + {numA} = <span className="text-amber-500 font-black">{ans}</span>. ¡Dominaste la descomposición! 🏆</p>
+                        ]
+                    };
+                }
+                default:
+                    return { maxSteps: 3, ans: numA * numB, explanations: [] };
+            }
+        };
+
+        function App() {
+            const [view, setView] = useState('home');
+            const [mode, setMode] = useState('trick1');
+            const [step, setStep] = useState(0);
+
+            const [exIndex, setExIndex] = useState(0);
+            const [numA, setNumA] = useState(34);
+            const [numB, setNumB] = useState(10);
+
+            const [isMuted, setIsMuted] = useState(false);
+
+            const [isPracticeMode, setIsPracticeMode] = useState(false);
+            const [practiceIndex, setPracticeIndex] = useState(0);
+            const [rings, setRings] = useState(0);
+            const [userAnswer, setUserAnswer] = useState('');
+            const [feedbackStatus, setFeedbackStatus] = useState(null);
+            const [showPointsAnim, setShowPointsAnim] = useState(false);
+
+            const handleInteraction = () => AudioController.init();
+
+            const loadExercise = (selectedMode, newIndex, isPractice = false) => {
+                const arr = isPractice ? PRACTICE_EXERCISES[selectedMode] : EXERCISES[selectedMode];
+                const safeIndex = ((newIndex % arr.length) + arr.length) % arr.length;
+                setNumA(arr[safeIndex][0]);
+                setNumB(arr[safeIndex][1]);
+                if (isPractice) {
+                    setPracticeIndex(safeIndex);
+                    setUserAnswer('');
+                    setFeedbackStatus(null);
+                } else {
+                    setExIndex(safeIndex);
+                }
+            };
+
+            const generateExample = (selectedMode = null, customIdx = null) => {
+                handleInteraction();
+                const currentMode = selectedMode || mode;
+                setStep(0);
+                AudioController.play('pop');
+                const newIndex = customIdx !== null ? customIdx : (selectedMode ? 0 : exIndex + 1);
+                loadExercise(currentMode, newIndex, false);
+            };
+
+            const togglePracticeMode = () => {
+                handleInteraction();
+                AudioController.play('swoosh');
+                const newIsPractice = !isPracticeMode;
+                setIsPracticeMode(newIsPractice);
+                setStep(0);
+                if (newIsPractice) loadExercise(mode, practiceIndex, true);
+                else loadExercise(mode, exIndex, false);
+            };
+
+            const nextPractice = () => {
+                handleInteraction();
+                AudioController.play('pop');
+                loadExercise(mode, practiceIndex + 1, true);
+            };
+
+            const trickData = getTrickData(mode, numA, numB);
+            const maxSteps = trickData.maxSteps;
+
+            const checkAnswer = () => {
+                handleInteraction();
+                if (!userAnswer.trim()) return;
+                const correctAns = numA * numB;
+
+                if (parseInt(userAnswer, 10) === correctAns) {
+                    AudioController.play('ring');
+                    setTimeout(() => AudioController.play('success'), 150);
+                    setFeedbackStatus('success');
+                    setRings(r => r + 50);
+                    setShowPointsAnim(true);
+                    setTimeout(() => setShowPointsAnim(false), 1800);
+                } else {
+                    AudioController.play('pop-reverse');
+                    setFeedbackStatus('error');
+                }
+            };
+
+            const enterLab = (newMode) => {
+                handleInteraction();
+                AudioController.play('swoosh');
+                setMode(newMode);
+                setView('lab');
+                setIsPracticeMode(false);
+                generateExample(newMode, 0);
+            };
+
+            const goHome = () => {
+                handleInteraction();
+                AudioController.play('swoosh');
+                setView('home');
+                setStep(0);
+            };
+
+            const toggleMute = () => {
+                handleInteraction();
+                setIsMuted(AudioController.toggleMute());
+            };
+
+            const nextStep = () => {
+                handleInteraction();
+                if (step < maxSteps) {
+                    const next = step + 1;
+                    setStep(next);
+                    if (next === maxSteps) {
+                        AudioController.play('ring');
+                        setTimeout(() => AudioController.play('success'), 120);
+                        setRings(r => r + 10);
+                    } else {
+                        AudioController.play('pop');
+                    }
+                }
+            };
+
+            const prevStep = () => {
+                handleInteraction();
+                if (step > 0) {
+                    setStep(step - 1);
+                    AudioController.play('pop-reverse');
+                }
+            };
+
+            const currentTrickMeta = TRICKS_INFO.find(t => t.id === mode) || TRICKS_INFO[0];
+
+            const renderExplanation = () => {
+                if (isPracticeMode) {
+                    if (feedbackStatus === 'success') {
+                        return <p>¡Súper Sónico! 🦔💨 Ganaste <span className="text-amber-500 font-black">+50 Anillos Dorados</span>. ¡Calculaste {numA} × {numB} = {numA * numB} a toda velocidad!</p>;
+                    }
+                    if (feedbackStatus === 'error') {
+                        return <p>¡Casi! 💫 Usa el truco de <strong>{currentTrickMeta.title}</strong> ({currentTrickMeta.subtitle}) e inténtalo de nuevo.</p>;
+                    }
+                    return <p>¡Reto de Velocidad! ⚡ Calcula mentalmente <strong>{numA} × {numB}</strong> usando el truco y presiona <strong>¡Comprobar!</strong></p>;
+                }
+                return trickData.explanations[step] || <p>¡Listo para correr a toda velocidad!</p>;
+            };
+
+            // Renderizador visual interactivo del pizarrón según el truco y el paso
+            const renderVisualBoard = () => {
+                // TRUCO 1: x10, x100, x1000
+                if (mode === 'trick1') {
+                    return (
+                        <div className="flex flex-wrap items-center justify-center text-3xl sm:text-6xl md:text-7xl lg:text-8xl font-black gap-x-2.5 sm:gap-x-4 gap-y-8 w-full py-4">
+                            <span className={step >= 2 ? "text-indigo-600 scale-105 transition-transform" : "text-slate-800"}>{numA}</span>
+                            <span className="text-slate-400">×</span>
+                            <div className="relative flex items-center">
+                                <span className="text-slate-800">1</span>
+                                <span className={step >= 1 ? "text-amber-500 bg-amber-100 px-2 rounded-xl sm:rounded-2xl border-2 border-amber-400 animate-pulse" : "text-slate-800"}>
+                                    {trickData.zerosStr}
+                                </span>
+                                {step === 1 && (
+                                    <div className="absolute top-[115%] left-1/2 -translate-x-1/2 text-xs sm:text-xl md:text-2xl text-amber-900 bg-amber-200 px-3 sm:px-4 py-1 rounded-full border-2 border-amber-500 animate-jellyPop whitespace-nowrap shadow-md z-30">
+                                        {trickData.zerosCount} {trickData.zerosCount === 1 ? 'cero' : 'ceros'}
+                                    </div>
+                                )}
+                            </div>
+                            <span className="text-rose-500">=</span>
+
+                            <div className="flex items-center relative">
+                                {step === 0 && <span className="text-slate-200 animate-wiggle">?</span>}
+                                {step === 1 && <span className="text-slate-300 animate-pulse">...</span>}
+                                {step === 2 && (
+                                    <div className="flex items-center animate-jellyPop">
+                                        <span className="text-indigo-600">{numA}</span>
+                                        <span className="text-emerald-600 bg-emerald-100 px-2 rounded-xl sm:rounded-2xl border-2 border-emerald-400 ml-1">{trickData.zerosStr}</span>
+                                    </div>
+                                )}
+                                {step === maxSteps && (
+                                    <div className="bg-[#fde047] text-slate-900 border-[4px] sm:border-[7px] border-[#eab308] rounded-[1.2rem] sm:rounded-[2.2rem] px-4 sm:px-8 py-1 sm:py-1.5 shadow-xl animate-jellyPop">
+                                        {trickData.ans}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    );
+                }
+
+                // TRUCO 4: Multiplicar por 4 (Doble 2 veces)
+                if (mode === 'trick4') {
+                    return (
+                        <div className="flex flex-col items-center justify-center gap-4 sm:gap-6 w-full py-2">
+                            <div className="flex flex-wrap items-center justify-center text-3xl sm:text-6xl md:text-7xl font-black gap-2 sm:gap-3">
+                                <span className="text-indigo-600">{numA}</span>
+                                <span className="text-slate-400">× 4 =</span>
+                                {step < maxSteps ? (
+                                    <span className="text-slate-200 animate-wiggle">?</span>
+                                ) : (
+                                    <div className="bg-[#fde047] text-slate-900 border-[4px] sm:border-[5px] border-[#eab308] rounded-[1.2rem] sm:rounded-[1.5rem] px-4 sm:px-5 py-1 shadow-xl animate-jellyPop">
+                                        {trickData.ans}
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Cadena de dobles */}
+                            <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-4 mt-1">
+                                <div className="px-3.5 sm:px-6 py-2 sm:py-3 rounded-2xl bg-indigo-100 border-2 sm:border-[3px] border-indigo-400 text-indigo-800 text-xl sm:text-4xl font-black shadow-sm">
+                                    {numA}
+                                </div>
+
+                                {step >= 1 && (
+                                    <Fragment>
+                                        <div className="flex flex-col items-center animate-jellyPop">
+                                            <span className="text-[10px] sm:text-sm font-black bg-cyan-500 text-white px-2 sm:px-2.5 py-0.5 rounded-full shadow">×2 (Doble 1)</span>
+                                            <span className="text-xl sm:text-4xl text-cyan-500 font-black leading-none mt-0.5">➔</span>
+                                        </div>
+                                        <div className="px-3.5 sm:px-6 py-2 sm:py-3 rounded-2xl bg-cyan-100 border-2 sm:border-[3px] border-cyan-400 text-cyan-900 text-xl sm:text-4xl font-black shadow-md animate-jellyPop">
+                                            {trickData.d1}
+                                        </div>
+                                    </Fragment>
+                                )}
+
+                                {step >= 2 && (
+                                    <Fragment>
+                                        <div className="flex flex-col items-center animate-jellyPop">
+                                            <span className="text-[10px] sm:text-sm font-black bg-emerald-500 text-white px-2 sm:px-2.5 py-0.5 rounded-full shadow">×2 (Doble 2)</span>
+                                            <span className="text-xl sm:text-4xl text-emerald-500 font-black leading-none mt-0.5">➔</span>
+                                        </div>
+                                        <div className={`px-3.5 sm:px-6 py-2 sm:py-3 rounded-2xl border-2 sm:border-[3px] text-xl sm:text-4xl font-black shadow-md animate-jellyPop ${step === maxSteps ? 'bg-amber-300 border-amber-500 text-slate-900 scale-105' : 'bg-emerald-100 border-emerald-400 text-emerald-900'}`}>
+                                            {trickData.ans}
+                                        </div>
+                                    </Fragment>
+                                )}
+                            </div>
+                        </div>
+                    );
+                }
+
+                // TRUCO 5: Multiplicar por 8 (Doble 3 veces)
+                if (mode === 'trick5') {
+                    return (
+                        <div className="flex flex-col items-center justify-center gap-4 sm:gap-6 w-full py-2">
+                            <div className="flex flex-wrap items-center justify-center text-3xl sm:text-6xl md:text-7xl font-black gap-2 sm:gap-3">
+                                <span className="text-indigo-600">{numA}</span>
+                                <span className="text-slate-400">× 8 =</span>
+                                {step < maxSteps ? (
+                                    <span className="text-slate-200 animate-wiggle">?</span>
+                                ) : (
+                                    <div className="bg-[#fde047] text-slate-900 border-[4px] sm:border-[5px] border-[#eab308] rounded-[1.2rem] sm:rounded-[1.5rem] px-4 sm:px-5 py-1 shadow-xl animate-jellyPop">
+                                        {trickData.ans}
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Cadena de 3 dobles */}
+                            <div className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-3">
+                                <div className="px-3 sm:px-5 py-1.5 sm:py-2 rounded-xl sm:rounded-2xl bg-slate-100 border-2 border-slate-300 text-slate-800 text-lg sm:text-3xl md:text-4xl font-black">
+                                    {numA}
+                                </div>
+
+                                {step >= 1 && (
+                                    <Fragment>
+                                        <div className="flex flex-col items-center animate-jellyPop">
+                                            <span className="text-[10px] sm:text-xs font-black bg-cyan-500 text-white px-1.5 sm:px-2 py-0.5 rounded-full">×2</span>
+                                            <span className="text-lg sm:text-3xl text-cyan-500 font-black leading-none">➔</span>
+                                        </div>
+                                        <div className="px-3 sm:px-5 py-1.5 sm:py-2 rounded-xl sm:rounded-2xl bg-cyan-100 border-2 border-cyan-400 text-cyan-900 text-lg sm:text-3xl md:text-4xl font-black animate-jellyPop">
+                                            {trickData.d1}
+                                        </div>
+                                    </Fragment>
+                                )}
+
+                                {step >= 2 && (
+                                    <Fragment>
+                                        <div className="flex flex-col items-center animate-jellyPop">
+                                            <span className="text-[10px] sm:text-xs font-black bg-indigo-500 text-white px-1.5 sm:px-2 py-0.5 rounded-full">×2</span>
+                                            <span className="text-lg sm:text-3xl text-indigo-500 font-black leading-none">➔</span>
+                                        </div>
+                                        <div className="px-3 sm:px-5 py-1.5 sm:py-2 rounded-xl sm:rounded-2xl bg-indigo-100 border-2 border-indigo-400 text-indigo-900 text-lg sm:text-3xl md:text-4xl font-black animate-jellyPop">
+                                            {trickData.d2}
+                                        </div>
+                                    </Fragment>
+                                )}
+
+                                {step >= 3 && (
+                                    <Fragment>
+                                        <div className="flex flex-col items-center animate-jellyPop">
+                                            <span className="text-[10px] sm:text-xs font-black bg-emerald-500 text-white px-1.5 sm:px-2 py-0.5 rounded-full">×2</span>
+                                            <span className="text-lg sm:text-3xl text-emerald-500 font-black leading-none">➔</span>
+                                        </div>
+                                        <div className={`px-3 sm:px-5 py-1.5 sm:py-2 rounded-xl sm:rounded-2xl border-2 text-lg sm:text-3xl md:text-4xl font-black animate-jellyPop ${step === maxSteps ? 'bg-amber-300 border-amber-500 text-slate-900 scale-105 shadow-lg' : 'bg-emerald-100 border-emerald-400 text-emerald-900'}`}>
+                                            {trickData.ans}
+                                        </div>
+                                    </Fragment>
+                                )}
+                            </div>
+                        </div>
+                    );
+                }
+
+                // TRUCO 6: Multiplicar por 9 (Una cifra)
+                if (mode === 'trick6') {
+                    return (
+                        <div className="flex flex-wrap items-center justify-center text-4xl sm:text-7xl md:text-8xl font-black gap-x-3 sm:gap-x-4 gap-y-10 w-full py-5">
+                            <div className="relative flex flex-col items-center">
+                                <span className="text-indigo-600">{numA}</span>
+                                {step === 1 && (
+                                    <div className="absolute top-[112%] text-xs sm:text-2xl text-indigo-900 bg-indigo-100 px-3 sm:px-3.5 py-1 rounded-full border-2 border-indigo-400 animate-jellyPop whitespace-nowrap shadow-md z-30">
+                                        {numA} − 1 = {trickData.left}
+                                    </div>
+                                )}
+                            </div>
+                            <span className="text-slate-400">× 9 =</span>
+
+                            {step === 0 && <span className="text-slate-200 animate-wiggle">?</span>}
+
+                            {step > 0 && step < maxSteps && (
+                                <div className="flex items-center gap-2">
+                                    <div className="relative flex flex-col items-center">
+                                        <span className="text-indigo-600 bg-indigo-50 px-3 sm:px-4 py-1 rounded-2xl border-2 border-indigo-300 animate-jellyPop">{trickData.left}</span>
+                                    </div>
+                                    {step >= 2 && (
+                                        <div className="relative flex flex-col items-center">
+                                            <span className="text-emerald-600 bg-emerald-50 px-3 sm:px-4 py-1 rounded-2xl border-2 border-emerald-300 animate-jellyPop">{trickData.right}</span>
+                                            <div className="absolute top-[112%] text-xs sm:text-2xl text-emerald-900 bg-emerald-100 px-3 sm:px-3.5 py-1 rounded-full border-2 border-emerald-400 animate-jellyPop whitespace-nowrap shadow-md z-30">
+                                                9 − {trickData.left} = {trickData.right}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+
+                            {step === maxSteps && (
+                                <div className="bg-[#fde047] text-slate-900 border-[4px] sm:border-[7px] border-[#eab308] rounded-[1.2rem] sm:rounded-[2.2rem] px-5 sm:px-6 py-1 sm:py-1.5 shadow-xl animate-jellyPop">
+                                    {trickData.ans}
+                                </div>
+                            )}
+                        </div>
+                    );
+                }
+
+                // TRUCO 7: Multiplicar por 9 (Cualquier número: x10 - N)
+                if (mode === 'trick7') {
+                    return (
+                        <div className="flex flex-col items-center justify-center gap-4 sm:gap-6 w-full py-2">
+                            <div className="flex flex-wrap items-center justify-center text-3xl sm:text-6xl md:text-7xl font-black gap-2 sm:gap-3">
+                                <span className="text-indigo-600">{numA}</span>
+                                <span className="text-slate-400">× 9 =</span>
+                                {step < maxSteps ? (
+                                    <span className="text-slate-200 animate-wiggle">?</span>
+                                ) : (
+                                    <div className="bg-[#fde047] text-slate-900 border-[4px] sm:border-[5px] border-[#eab308] rounded-[1.2rem] sm:rounded-[1.5rem] px-4 sm:px-6 py-1 shadow-xl animate-jellyPop">
+                                        {trickData.ans}
+                                    </div>
+                                )}
+                            </div>
+
+                            {step >= 1 && (
+                                <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 text-xl sm:text-4xl md:text-5xl font-black animate-jellyPop">
+                                    <div className="bg-indigo-100 border-2 border-indigo-400 text-indigo-800 px-3 sm:px-4 py-1.5 sm:py-2 rounded-2xl shadow-sm flex flex-col items-center">
+                                        <span>{trickData.times10}</span>
+                                        <span className="text-[10px] sm:text-sm text-indigo-500 font-bold">({numA} × 10)</span>
+                                    </div>
+
+                                    {step >= 2 && (
+                                        <Fragment>
+                                            <span className="text-rose-500 text-2xl sm:text-5xl">−</span>
+                                            <div className="bg-rose-100 border-2 border-rose-400 text-rose-800 px-3 sm:px-4 py-1.5 sm:py-2 rounded-2xl shadow-sm flex flex-col items-center animate-jellyPop">
+                                                <span>{numA}</span>
+                                                <span className="text-[10px] sm:text-sm text-rose-500 font-bold">(× 1)</span>
+                                            </div>
+                                        </Fragment>
+                                    )}
+
+                                    {step === maxSteps && (
+                                        <Fragment>
+                                            <span className="text-emerald-600">=</span>
+                                            <span className="text-emerald-600 bg-emerald-100 border-2 border-emerald-400 px-3 sm:px-4 py-1.5 sm:py-2 rounded-2xl animate-jellyPop">{trickData.ans}</span>
+                                        </Fragment>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    );
+                }
+
+                // TRUCO 8: Multiplicar por 11 (Una cifra)
+                if (mode === 'trick8') {
+                    return (
+                        <div className="flex flex-wrap items-center justify-center text-4xl sm:text-7xl md:text-8xl font-black gap-x-3 sm:gap-x-4 gap-y-6 w-full py-4">
+                            <span className="text-indigo-600">{numA}</span>
+                            <span className="text-slate-400">× 11 =</span>
+
+                            {step === 0 && <span className="text-slate-200 animate-wiggle">?</span>}
+
+                            {step === 1 && (
+                                <div className="flex items-center gap-2 animate-jellyPop">
+                                    <span className="bg-indigo-100 text-indigo-700 border-2 border-indigo-400 px-3.5 sm:px-4 py-1 rounded-2xl">{numA}</span>
+                                    <span className="bg-emerald-100 text-emerald-700 border-2 border-emerald-400 px-3.5 sm:px-4 py-1 rounded-2xl">{numA}</span>
+                                </div>
+                            )}
+
+                            {step === maxSteps && (
+                                <div className="bg-[#fde047] text-slate-900 border-[4px] sm:border-[7px] border-[#eab308] rounded-[1.2rem] sm:rounded-[2.2rem] px-5 sm:px-6 py-1 sm:py-1.5 shadow-xl animate-jellyPop">
+                                    {trickData.ans}
+                                </div>
+                            )}
+                        </div>
+                    );
+                }
+
+                // TRUCO 9: Multiplicar por 11 (Dos cifras ab -> a (a+b) b)
+                if (mode === 'trick9') {
+                    return (
+                        <div className="flex flex-wrap items-center justify-center text-3xl sm:text-6xl md:text-7xl lg:text-8xl font-black gap-x-2.5 sm:gap-x-3 gap-y-10 w-full py-5">
+                            <div className="flex items-center">
+                                <span className="text-indigo-600">{trickData.a}</span>
+                                <span className="text-sky-600">{trickData.b}</span>
+                            </div>
+                            <span className="text-slate-400">× 11 =</span>
+
+                            {step === 0 && <span className="text-slate-200 animate-wiggle">?</span>}
+
+                            {step > 0 && step < maxSteps && (
+                                <div className="flex items-center gap-1.5 sm:gap-3 animate-jellyPop relative">
+                                    <span className="bg-indigo-100 text-indigo-700 border-2 border-indigo-400 px-3 sm:px-3.5 py-1 rounded-2xl">{trickData.a}</span>
+                                    
+                                    <div className="relative flex flex-col items-center">
+                                        {step === 1 ? (
+                                            <span className="w-10 sm:w-16 h-10 sm:h-16 rounded-2xl border-4 border-dashed border-slate-300 flex items-center justify-center text-slate-300 text-2xl sm:text-3xl">?</span>
+                                        ) : (
+                                            <span className="bg-emerald-100 text-emerald-700 border-2 border-emerald-400 px-3 sm:px-3.5 py-1 rounded-2xl animate-jellyPop">{trickData.mid}</span>
+                                        )}
+                                        {step === 2 && (
+                                            <div className="absolute top-[115%] text-xs sm:text-2xl text-emerald-900 bg-emerald-200 px-3 sm:px-3.5 py-1 rounded-full border-2 border-emerald-500 animate-jellyPop whitespace-nowrap shadow-md z-30">
+                                                {trickData.a} + {trickData.b} = {trickData.mid}
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    <span className="bg-sky-100 text-sky-700 border-2 border-sky-400 px-3 sm:px-3.5 py-1 rounded-2xl">{trickData.b}</span>
+                                </div>
+                            )}
+
+                            {step === maxSteps && (
+                                <div className="bg-[#fde047] text-slate-900 border-[4px] sm:border-[7px] border-[#eab308] rounded-[1.2rem] sm:rounded-[2.2rem] px-5 sm:px-6 py-1 sm:py-1.5 shadow-xl animate-jellyPop">
+                                    {trickData.ans}
+                                </div>
+                            )}
+                        </div>
+                    );
+                }
+
+                // TRUCO 10: Multiplicar por 6 (6 = 5 + 1)
+                if (mode === 'trick10') {
+                    return (
+                        <div className="flex flex-col items-center justify-center gap-4 sm:gap-6 w-full py-2">
+                            <div className="flex flex-wrap items-center justify-center text-3xl sm:text-6xl md:text-7xl font-black gap-2 sm:gap-3">
+                                <span className="text-indigo-600">{numA}</span>
+                                <span className="text-slate-400">× 6 =</span>
+                                {step < maxSteps ? (
+                                    <span className="text-slate-200 animate-wiggle">?</span>
+                                ) : (
+                                    <div className="bg-[#fde047] text-slate-900 border-[4px] sm:border-[5px] border-[#eab308] rounded-[1.2rem] sm:rounded-[1.5rem] px-4 sm:px-6 py-1 shadow-xl animate-jellyPop">
+                                        {trickData.ans}
+                                    </div>
+                                )}
+                            </div>
+
+                            {step >= 1 && (
+                                <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 text-xl sm:text-4xl md:text-5xl font-black animate-jellyPop">
+                                    <div className="bg-indigo-100 border-2 border-indigo-400 text-indigo-800 px-3 sm:px-4 py-1.5 sm:py-2 rounded-2xl shadow-sm flex flex-col items-center">
+                                        <span>{trickData.x5}</span>
+                                        <span className="text-[10px] sm:text-sm text-indigo-500 font-bold">({numA} × 5)</span>
+                                    </div>
+
+                                    {step >= 2 && (
+                                        <Fragment>
+                                            <span className="text-emerald-600 text-2xl sm:text-5xl">+</span>
+                                            <div className="bg-emerald-100 border-2 border-emerald-400 text-emerald-800 px-3 sm:px-4 py-1.5 sm:py-2 rounded-2xl shadow-sm flex flex-col items-center animate-jellyPop">
+                                                <span>{numA}</span>
+                                                <span className="text-[10px] sm:text-sm text-emerald-600 font-bold">({numA} × 1)</span>
+                                            </div>
+                                        </Fragment>
+                                    )}
+
+                                    {step === maxSteps && (
+                                        <Fragment>
+                                            <span className="text-amber-500">=</span>
+                                            <span className="text-amber-900 bg-amber-200 border-2 border-amber-500 px-3 sm:px-4 py-1.5 sm:py-2 rounded-2xl animate-jellyPop">{trickData.ans}</span>
+                                        </Fragment>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    );
+                }
+
+                return null;
+            };
+
+            if (view === 'home') {
+                return (
+                    <div className="min-h-[100dvh] w-full bg-gradient-to-br from-[#0f172a] via-[#1d4ed8] to-[#1e1b4b] flex flex-col justify-between p-3 sm:p-6 md:p-8 relative font-fun overflow-x-hidden overflow-y-auto">
+                        <InteractiveSonicBackground />
+                        
+                        {/* Responsive Top Navigation Bar */}
+                        <header className="relative z-20 w-full max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2 py-1">
+                            <div className="inline-flex items-center gap-1.5 sm:gap-2 px-3.5 sm:px-5 py-1.5 sm:py-2 rounded-full border-2 border-yellow-400/70 bg-blue-950/70 backdrop-blur-md text-yellow-300 text-xs sm:text-sm font-black tracking-wider uppercase shadow-xl">
+                                <Zap className="w-4 h-4 sm:w-5 sm:h-5 fill-current" /> TuProfe20 Lab • 4.º Primaria
+                            </div>
+
+                            <div className="flex items-center gap-2 sm:gap-3">
+                                <div className="flex items-center gap-1.5 sm:gap-2 bg-amber-400/95 backdrop-blur-md px-3 sm:px-4 py-1.5 sm:py-2 rounded-2xl border-2 border-yellow-200 text-slate-900 text-xs sm:text-base font-black shadow-lg">
+                                    <span className="w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-full border-[3px] border-slate-900 inline-block animate-spin" />
+                                    <span>Anillos: {rings}</span>
+                                </div>
+                                <button onClick={toggleMute} className="p-2.5 sm:p-3 rounded-2xl bg-white/15 backdrop-blur-md shadow-lg text-white hover:bg-white/25 transition-all hover:scale-105 active:scale-95">
+                                    {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
+                                </button>
+                            </div>
+                        </header>
+
+                        {/* Main Hero & Grid */}
+                        <main className="relative z-10 text-center w-full max-w-7xl mx-auto my-auto py-3 sm:py-6">
+                            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-6 mb-4 sm:mb-6">
+                                <SonicAssistant size="hero" step={0} maxSteps={3} isPracticeMode={false} feedbackStatus={null} onPoke={() => setRings(r => r + 5)} />
+                                <div className="text-center sm:text-left max-w-2xl">
+                                    <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-transparent bg-clip-text bg-gradient-to-b from-yellow-200 via-amber-400 to-orange-500 drop-shadow-[0_6px_6px_rgba(0,0,0,0.65)] leading-tight">
+                                        Trucos de Multiplicación
+                                    </h1>
+                                    <p className="text-xs sm:text-base md:text-xl text-cyan-200 font-bold mt-1.5 px-2 sm:px-0">
+                                        ¡Domina el cálculo mental a la velocidad de Sonic! (Toca a Sonic para hacer un Spin Dash) 🦔💨
+                                    </p>
+                                </div>
+                            </div>
+
+                            {/* Grid Adaptable de 8 Trucos */}
+                            <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-5 px-1 sm:px-2 w-full">
+                                {TRICKS_INFO.map((t) => (
+                                    <button
+                                        key={t.id}
+                                        onClick={() => enterLab(t.id)}
+                                        className={`group text-left p-4 sm:p-5 rounded-[1.5rem] sm:rounded-[2rem] bg-gradient-to-br ${t.gradient} border-[3px] ${t.border} backdrop-blur-xl hover:-translate-y-1.5 active:scale-98 ${t.shadow} transition-all flex flex-col justify-between min-h-[8.5rem] sm:h-44 relative overflow-hidden`}
+                                    >
+                                        <div className="absolute -bottom-2 -right-1 text-4xl sm:text-5xl font-black text-white/15 group-hover:text-white/30 group-hover:scale-110 transition-all select-none">
+                                            {t.badge}
+                                        </div>
+                                        <div>
+                                            <div className="flex items-center justify-between gap-2 mb-1">
+                                                <span className="text-[10px] sm:text-xs font-black uppercase tracking-wider bg-black/35 text-yellow-300 px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full border border-yellow-400/40">
+                                                    {t.number}
+                                                </span>
+                                                <span className="text-[10px] sm:text-[11px] font-bold text-white/85 truncate">
+                                                    {t.level}
+                                                </span>
+                                            </div>
+                                            <h3 className="text-lg sm:text-2xl font-black text-white mt-1 drop-shadow-md leading-tight">
+                                                {t.title}
+                                            </h3>
+                                        </div>
+                                        <p className="text-white/95 text-xs sm:text-sm font-bold leading-snug pr-8 mt-2">
+                                            {t.subtitle}
+                                        </p>
+                                    </button>
+                                ))}
+                            </div>
+                        </main>
+
+                        <footer className="relative z-10 text-center text-cyan-200/70 text-xs font-bold py-1">
+                            TuProfe20 • Matemática que se entiende y se practica en cualquier dispositivo
+                        </footer>
+                    </div>
+                );
+            }
+
+            return (
+                <div className="min-h-[100dvh] w-full bg-gradient-to-br from-[#0f172a] via-[#1e40af] to-[#3b0764] text-slate-800 flex flex-col p-2 sm:p-3 md:p-4 relative font-fun overflow-x-hidden overflow-y-auto">
+                    <InteractiveSonicBackground />
+                    {!isPracticeMode && step === maxSteps && <Confetti />}
+
+                    {/* Header bar */}
+                    <div className="shrink-0 relative z-10 w-full max-w-6xl mx-auto flex justify-between items-center mb-1.5 sm:mb-3 px-1 gap-2">
+                        <button onClick={goHome} className="flex items-center justify-center px-3 py-2 sm:px-4 sm:py-2 rounded-xl sm:rounded-2xl bg-white/15 border-2 border-white/35 backdrop-blur-md text-white font-black hover:bg-white/25 transition-all shadow-md active:scale-95">
+                            <Home className="w-4 h-4 sm:w-5 sm:h-5 sm:mr-1.5" />
+                            <span className="hidden xs:inline text-xs sm:text-base ml-1 sm:ml-0">Menú</span>
+                        </button>
+
+                        <div className="flex flex-col items-center min-w-0 px-1">
+                            <span className="text-[9px] sm:text-xs font-black uppercase tracking-widest text-yellow-300 truncate max-w-full">
+                                {currentTrickMeta.number} • {currentTrickMeta.level}
+                            </span>
+                            <h2 className="text-sm sm:text-2xl md:text-3xl font-black text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)] text-center truncate max-w-full">
+                                {currentTrickMeta.title}
+                            </h2>
+                        </div>
+
+                        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+                            <div className="flex items-center gap-1.5 bg-amber-400 px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-xl sm:rounded-2xl border-2 border-yellow-200 text-slate-900 font-black shadow-md">
+                                <span className="w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-full border-[3px] border-slate-900 inline-block animate-spin" />
+                                <span className="text-xs sm:text-base">{rings}</span>
+                            </div>
+                            <button onClick={toggleMute} className="p-2 sm:p-2.5 rounded-xl sm:rounded-2xl bg-white/15 border-2 border-white/35 backdrop-blur-md text-white hover:bg-white/25 transition-all shadow-md">
+                                {isMuted ? <VolumeX className="w-4 h-4 sm:w-5 sm:h-5" /> : <Volume2 className="w-4 h-4 sm:w-5 sm:h-5" />}
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Main Interactive Card */}
+                    <div className="flex-1 flex flex-col justify-between relative z-10 w-full max-w-6xl mx-auto bg-white rounded-[1.25rem] sm:rounded-[2.2rem] border-[3px] sm:border-[6px] border-white shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden my-auto">
+                        
+                        {/* Quick Example Selector Pills */}
+                        <div className="shrink-0 bg-slate-100/95 border-b-2 border-slate-200 px-2.5 sm:px-4 py-1.5 sm:py-2 flex items-center justify-between gap-2 overflow-x-auto no-scrollbar">
+                            <span className="text-[11px] sm:text-sm font-black text-slate-500 uppercase tracking-wider shrink-0">
+                                {isPracticeMode ? '🎯 Retos:' : '📘 Ejemplos:'}
+                            </span>
+                            <div className="flex items-center gap-1 sm:gap-1.5">
+                                {(isPracticeMode ? PRACTICE_EXERCISES[mode] : EXERCISES[mode]).map((pair, idx) => {
+                                    const activeIdx = isPracticeMode ? practiceIndex : exIndex;
+                                    const isCurrent = idx === activeIdx;
+                                    return (
+                                        <button
+                                            key={idx}
+                                            onClick={() => {
+                                                handleInteraction();
+                                                AudioController.play('pop');
+                                                setStep(0);
+                                                loadExercise(mode, idx, isPracticeMode);
+                                            }}
+                                            className={`px-2 sm:px-2.5 py-1 rounded-lg sm:rounded-xl text-[11px] sm:text-sm font-black transition-all shrink-0 ${
+                                                isCurrent
+                                                    ? 'bg-blue-600 text-white shadow-sm scale-105'
+                                                    : 'bg-white text-slate-600 hover:bg-blue-50 border border-slate-200'
+                                            }`}
+                                        >
+                                            #{idx + 1} ({pair[0]}×{pair[1]})
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        </div>
+
+                        {/* Math Stage */}
+                        <div className="flex-1 min-h-[11rem] sm:min-h-[15rem] flex flex-col items-center justify-center p-3 sm:p-6 relative bg-slate-50 overflow-y-auto w-full">
+                            <div className="absolute inset-0 opacity-5 bg-[radial-gradient(#1e40af_2px,transparent_2px)] [background-size:24px_24px] pointer-events-none"></div>
+
+                            {!isPracticeMode && step === maxSteps && (
+                                <div className="absolute top-2 right-2 sm:top-3 sm:right-3 bg-gradient-to-r from-yellow-400 to-amber-500 text-slate-900 font-black px-3 py-1 sm:px-4 sm:py-1.5 rounded-xl animate-bounce shadow-lg border-2 border-yellow-200 flex items-center gap-1 text-xs sm:text-base z-20">
+                                    <Star fill="currentColor" className="w-4 h-4 sm:w-5 sm:h-5"/> ¡Super Sonic! +10 Anillos
+                                </div>
+                            )}
+
+                            <div className="w-full flex items-center justify-center px-1 sm:px-4 max-w-full z-10 my-auto">
+                                {!isPracticeMode ? (
+                                    renderVisualBoard()
+                                ) : (
+                                    <div className="flex flex-col items-center justify-center w-full relative py-2">
+                                        {showPointsAnim && <GoldenRingsExplosion />}
+                                        {showPointsAnim && (
+                                            <div className="absolute -top-10 left-1/2 -translate-x-1/2 flex items-center justify-center pointer-events-none z-50 animate-pointsFloat">
+                                                <span className="text-2xl sm:text-5xl font-black text-amber-500 drop-shadow-[0_4px_4px_white]">+50 Anillos</span>
+                                            </div>
+                                        )}
+
+                                        <div className="flex items-center justify-center text-3xl sm:text-6xl md:text-7xl font-black whitespace-nowrap bg-white px-4 py-4 sm:px-10 sm:py-7 rounded-[1.5rem] sm:rounded-[2rem] shadow-[0_8px_30px_rgba(0,0,0,0.06)] border-[3px] border-slate-100 flex-wrap gap-x-2.5 sm:gap-x-4 gap-y-3 max-w-full z-10">
+                                            <span className="text-[#2563eb]">{numA}</span>
+                                            <span className="text-slate-400">×</span>
+                                            <span className="text-[#2563eb]">{numB}</span>
+                                            <span className="text-[#f43f5e]">=</span>
+
+                                            {feedbackStatus === 'success' ? (
+                                                <span className="text-[#10b981] animate-jellyPop inline-block text-center">{userAnswer}</span>
+                                            ) : (
+                                                <input
+                                                    type="number"
+                                                    inputMode="numeric"
+                                                    value={userAnswer}
+                                                    placeholder="?"
+                                                    onChange={(e) => { setUserAnswer(e.target.value); setFeedbackStatus(null); }}
+                                                    onKeyDown={(e) => e.key === 'Enter' && checkAnswer()}
+                                                    className={`w-24 sm:w-44 text-center bg-slate-50 border-b-[5px] sm:border-b-[6px] rounded-xl sm:rounded-2xl outline-none transition-all focus:border-blue-500 focus:bg-blue-50/50 py-1 ${
+                                                        feedbackStatus === 'error' ? 'border-rose-400 text-rose-500 animate-wiggle' : 'border-slate-300 text-[#10b981]'
+                                                    }`}
+                                                    autoFocus
+                                                />
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Sonic Assistant & Explanation Banner */}
+                        <div className="shrink-0 bg-white w-full px-2.5 py-2 sm:px-6 sm:py-3.5 flex items-center gap-2.5 sm:gap-5 border-t-[3px] sm:border-t-[4px] border-slate-200 z-10 relative">
+                            <SonicAssistant
+                                step={step}
+                                maxSteps={maxSteps}
+                                isPracticeMode={isPracticeMode}
+                                feedbackStatus={feedbackStatus}
+                                onPoke={() => setRings(r => r + 5)}
+                            />
+                            <div className="flex-1 text-sm sm:text-xl md:text-2xl font-bold text-slate-700 leading-snug bg-blue-50/80 p-2.5 sm:p-4 rounded-xl sm:rounded-2xl border-2 border-blue-100 min-h-[3.8rem] sm:min-h-[4.8rem] flex items-center">
+                                <div key={isPracticeMode ? `${practiceIndex}-${feedbackStatus}` : `${exIndex}-${step}`} className="animate-slideInRight w-full">
+                                    {renderExplanation()}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Control Panel Footer */}
+                        <div className="shrink-0 bg-gradient-to-b from-blue-100 to-indigo-200 p-2.5 sm:p-4 w-full flex flex-col items-center gap-2 sm:gap-2.5 border-t-[3px] sm:border-t-[4px] border-white z-10">
+                            <div className="flex w-full max-w-3xl gap-2 sm:gap-3">
+                                <button
+                                    onClick={() => isPracticeMode ? togglePracticeMode() : generateExample()}
+                                    className="flex-1 bg-white border-b-[4px] sm:border-b-[5px] border-slate-300 text-blue-700 rounded-xl sm:rounded-2xl py-2 sm:py-2.5 px-2 sm:px-3 font-black text-xs sm:text-lg md:text-xl flex items-center justify-center gap-1.5 sm:gap-2 active:border-b-0 active:translate-y-[4px] transition-all shadow-sm hover:bg-slate-50"
+                                >
+                                    <RotateCcw className="w-4 h-4 sm:w-6 sm:h-6 shrink-0" />
+                                    <span className="truncate">{isPracticeMode ? 'Ver Ejemplos' : `Ejemplo (${exIndex + 1}/8)`}</span>
+                                </button>
+
+                                <button
+                                    onClick={togglePracticeMode}
+                                    className={`flex-1 border-b-[4px] sm:border-b-[5px] text-white rounded-xl sm:rounded-2xl py-2 sm:py-2.5 px-2 sm:px-3 font-black text-xs sm:text-lg md:text-xl flex items-center justify-center gap-1.5 sm:gap-2 transition-all shadow-sm active:border-b-0 active:translate-y-[4px] ${
+                                        isPracticeMode
+                                            ? 'bg-indigo-600 border-indigo-800 hover:brightness-110'
+                                            : 'bg-emerald-500 border-emerald-700 hover:brightness-110'
+                                    }`}
+                                >
+                                    <Rocket className="w-4 h-4 sm:w-6 sm:h-6 shrink-0" />
+                                    <span className="truncate">{isPracticeMode ? 'Práctica Activa' : '¡A Practicar! (8)'}</span>
+                                </button>
+                            </div>
+
+                            <div className="flex justify-center items-stretch w-full max-w-3xl gap-2 sm:gap-2.5 h-11 sm:h-14">
+                                {!isPracticeMode ? (
+                                    <Fragment>
+                                        <button
+                                            onClick={prevStep}
+                                            disabled={step === 0}
+                                            className="flex-[0.7] sm:flex-[0.8] bg-blue-200 border-b-[4px] sm:border-b-[5px] border-blue-400 text-blue-900 rounded-xl sm:rounded-2xl font-black text-xs sm:text-lg md:text-xl flex items-center justify-center gap-1 active:border-b-0 active:translate-y-[4px] disabled:opacity-40 transition-all hover:bg-blue-300"
+                                        >
+                                            <ChevronLeft className="w-5 h-5 sm:w-7 sm:h-7" />
+                                            <span className="hidden xs:inline">Atrás</span>
+                                        </button>
+
+                                        <div className="bg-blue-700 text-white font-black px-3 sm:px-6 text-sm sm:text-xl flex items-center justify-center rounded-xl sm:rounded-2xl border-b-[4px] sm:border-b-[5px] border-blue-900 shadow-inner min-w-[3.8rem] sm:min-w-[4.5rem]">
+                                            {step}/{maxSteps}
+                                        </div>
+
+                                        {step < maxSteps ? (
+                                            <button
+                                                onClick={nextStep}
+                                                className="flex-[2] bg-gradient-to-r from-amber-400 to-orange-500 border-b-[4px] sm:border-b-[5px] border-orange-700 text-slate-900 rounded-xl sm:rounded-2xl font-black text-sm sm:text-xl md:text-2xl flex items-center justify-center gap-1.5 sm:gap-2 active:border-b-0 active:translate-y-[4px] transition-all hover:brightness-105 shadow-md"
+                                            >
+                                                <span>¡Siguiente Paso!</span> <ChevronRight className="w-5 h-5 sm:w-8 sm:h-8" />
+                                            </button>
+                                        ) : (
+                                            <button
+                                                onClick={() => generateExample()}
+                                                className="flex-[2] bg-gradient-to-r from-emerald-400 to-teal-500 border-b-[4px] sm:border-b-[5px] border-teal-700 text-white rounded-xl sm:rounded-2xl font-black text-sm sm:text-xl md:text-2xl flex items-center justify-center gap-1.5 sm:gap-2 active:border-b-0 active:translate-y-[4px] transition-all hover:brightness-105 shadow-md animate-pulse"
+                                            >
+                                                <span>¡Siguiente Ejemplo!</span> <ChevronRight className="w-5 h-5 sm:w-8 sm:h-8" />
+                                            </button>
+                                        )}
+                                    </Fragment>
+                                ) : (
+                                    <Fragment>
+                                        <div className="bg-blue-700 text-white font-black px-3 sm:px-6 text-xs sm:text-xl flex items-center justify-center rounded-xl sm:rounded-2xl border-b-[4px] sm:border-b-[5px] border-blue-900 shadow-inner min-w-[5rem] sm:min-w-[6.5rem]">
+                                            Reto {practiceIndex + 1}/8
+                                        </div>
+                                        {feedbackStatus !== 'success' ? (
+                                            <button
+                                                onClick={checkAnswer}
+                                                className="flex-[2] bg-emerald-500 border-b-[4px] sm:border-b-[5px] border-emerald-700 text-white rounded-xl sm:rounded-2xl font-black text-sm sm:text-xl md:text-2xl flex items-center justify-center gap-1.5 sm:gap-2 active:border-b-0 active:translate-y-[4px] transition-all hover:brightness-110 shadow-md"
+                                            >
+                                                <span>¡Comprobar!</span> <Star className="w-4 h-4 sm:w-7 sm:h-7" fill="currentColor" />
+                                            </button>
+                                        ) : (
+                                            <button
+                                                onClick={nextPractice}
+                                                className="flex-[2] bg-gradient-to-r from-amber-400 to-orange-500 border-b-[4px] sm:border-b-[5px] border-orange-700 text-slate-900 rounded-xl sm:rounded-2xl font-black text-sm sm:text-xl md:text-2xl flex items-center justify-center gap-1.5 sm:gap-2 active:border-b-0 active:translate-y-[4px] transition-all hover:brightness-110 shadow-md animate-pulse"
+                                            >
+                                                <span>Siguiente Reto</span> <ChevronRight className="w-5 h-5 sm:w-8 sm:h-8" />
+                                            </button>
+                                        )}
+                                    </Fragment>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
